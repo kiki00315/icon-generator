@@ -4,6 +4,8 @@
 **同じ文字からは、いつも同じアイコン**ができます。ブログやポートフォリオのプロフィール画像、ファビコンに使えます。
 Vite + TypeScript で作っていて、ライブラリは使っていません（実行時の依存はゼロです）。
 
+**デモ：** https://kiki00315.github.io/icon-generator/
+
 ![画面のスクリーンショット](docs/screenshot.png)
 
 ## できること
@@ -17,7 +19,7 @@ Vite + TypeScript で作っていて、ライブラリは使っていません�
 
 ```bash
 npm install
-npm run dev        # 開発用サーバー（http://localhost:5173）
+npm run dev        # 開発用サーバー（http://localhost:5173/icon-generator/）
 npm test           # テスト
 npm run typecheck  # 型のチェック
 npm run build      # 公開用のファイルを dist/ に作る
@@ -69,6 +71,8 @@ SVG は文字でできているので、変な文字を入れられると、`<sc
 | `src/generate.ts` | アイコン（SVG の文字列）を作る中心の部分。画面には触らない |
 | `src/main.ts` | 画面の動き（入力・表示・保存・コピー） |
 | `src/style.css` | 見た目 |
+| `vite.config.ts` | ビルドの設定（GitHub Pages 用に、アドレスの `base` を設定） |
+| `.github/workflows/pages.yml` | `main` に push すると、テスト・ビルドをして、GitHub Pages に自動で公開する |
 | `test/generate.test.ts` | テスト（16 個） |
 
 ## 作った人
