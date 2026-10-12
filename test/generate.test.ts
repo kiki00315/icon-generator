@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { generateIcon, MAX_GRID, MIN_GRID, type IconOptions } from '../src/generate';
 import { createRandom, hashString } from '../src/random';
-import { findPalette, isHexColor, PALETTES } from '../src/palettes';
+import { findPalette, importedPalette, isHexColor, PALETTES, parseColorsParam } from '../src/palettes';
 
 const base: IconOptions = {
   seed: 'kiki',
@@ -121,5 +121,40 @@ describe('generateIcon', () => {
     expect(() => generateIcon({ ...base, grid: 2 })).toThrow('マスの数');
     expect(() => generateIcon({ ...base, grid: 9 })).toThrow('マスの数');
     expect(() => generateIcon({ ...base, grid: 4.5 })).toThrow('マスの数');
+  });
+});
+
+describe('他のツールから色を受け取る（parseColorsParam）', () => {
+  it('カンマでくぎった色を、#つきの大文字にして返す', () => {
+    expect(parseColorsParam('2d3a2e,4F6D44,88a66b')).toEqual(['#2D3A2E', '#4F6D44', '#88A66B']);
+    expect(parseColorsParam('#2D3A2E, #4F6D44')).toEqual(['#2D3A2E', '#4F6D44']); // # や空白があっても読める
+  });
+
+  it('同じ色は 1 つにまとめる。まとめて 1 色以下になったら、受け取らない', () => {
+    expect(parseColorsParam('2D3A2E,2d3a2e,4F6D44')).toEqual(['#2D3A2E', '#4F6D44']);
+    expect(parseColorsParam('2D3A2E,2d3a2e')).toBeNull();
+  });
+
+  it('空・1 色だけ・多すぎるときは、受け取らない', () => {
+    expect(parseColorsParam(null)).toBeNull();
+    expect(parseColorsParam('')).toBeNull();
+    expect(parseColorsParam('2D3A2E')).toBeNull();
+    expect(parseColorsParam('111111,222222,333333,444444,555555,666666,777777,888888,999999')).toBeNull();
+  });
+
+  it('1 つでもおかしな色があれば、まるごと受け取らない（外から来た文字なので）', () => {
+    expect(parseColorsParam('2D3A2E,red')).toBeNull();
+    expect(parseColorsParam('2D3A2E,zzzzzz')).toBeNull();
+    expect(parseColorsParam('2D3A2E,4F6D44"/><script>')).toBeNull();
+    expect(parseColorsParam('2D3A2E,javascript:alert(1)')).toBeNull();
+  });
+
+  it('受け取ったパレットで、そのままアイコンを作れる', () => {
+    const colors = parseColorsParam('2D3A2E,4F6D44,88A66B');
+    expect(colors).not.toBeNull();
+    const palette = importedPalette(colors ?? []);
+    const svg = generateIcon({ ...base, colors: palette.colors });
+    const used = new Set(svg.match(/#[0-9A-Fa-f]{6}/g));
+    for (const color of used) expect(palette.colors).toContain(color);
   });
 });

@@ -26,3 +26,28 @@ export function findPalette(id: string): Palette {
 export function isHexColor(value: string): boolean {
   return /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(value);
 }
+
+/** 他のツール（色見本ジェネレーター）から受け取れる色の数 */
+export const MIN_IMPORT_COLORS = 2;
+export const MAX_IMPORT_COLORS = 8;
+
+/**
+ * アドレスで受け取った色（例："2D3A2E,4F6D44,88A66B"）を、["#2D3A2E", ...] に直す。
+ * 外から来た文字なので、1 つずつ「正しい色か」を調べる。1 つでもおかしければ、まるごと受け取らない（null）。
+ */
+export function parseColorsParam(value: string | null): string[] | null {
+  if (!value) return null;
+  const colors: string[] = [];
+  for (const part of value.split(',')) {
+    const color = `#${part.trim().replace(/^#/, '')}`.toUpperCase();
+    if (!isHexColor(color)) return null;
+    if (!colors.includes(color)) colors.push(color); // 同じ色は 1 つにまとめる（図形が見えなくなるため）
+  }
+  return colors.length >= MIN_IMPORT_COLORS && colors.length <= MAX_IMPORT_COLORS ? colors : null;
+}
+
+/** 受け取った色を、パレットにする。id は 'imported' で固定 */
+export const IMPORTED_ID = 'imported';
+export function importedPalette(colors: readonly string[]): Palette {
+  return { id: IMPORTED_ID, name: '色見本ジェネレーターのパレット', colors };
+}
