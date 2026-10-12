@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="名前などの文字から、幾何学の模様のアイコンを作れるツール。SVG・PNG で保存できます。">
+  <title>幾何学アイコンジェネレーター</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234F6D44'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23C9D8A8'/%3E%3C/svg%3E">
+  <script type="module" src="/src/main.ts"></script>
+</head>
+<body>
+  <main class="app">
+    <header class="head">
+      <p class="eyebrow">WEB TOOL</p>
+      <h1>幾何学アイコンジェネレーター</h1>
+      <p class="lead">名前などの文字から、幾何学の模様のアイコンを作ります。同じ文字なら、いつも同じアイコンになります。</p>
+    </header>
+
+    <div class="layout">
+      <section class="stage" aria-label="プレビュー">
+        <div class="preview" id="preview" role="img" aria-label="作ったアイコンのプレビュー"></div>
+
+        <div class="sizes" aria-label="小さくしたときの見え方">
+          <figure><div class="size size-64" id="size-64"></div><figcaption>64px</figcaption></figure>
+          <figure><div class="size size-32" id="size-32"></div><figcaption>32px</figcaption></figure>
+          <figure><div class="size size-16" id="size-16"></div><figcaption>16px</figcaption></figure>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn primary" id="download-svg">SVG で保存</button>
+          <button type="button" class="btn" id="download-png">PNG で保存</button>
+          <button type="button" class="btn" id="copy-svg">SVG をコピー</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="設定">
+        <div class="field">
+          <label for="seed">名前（文字）</label>
+          <div class="row">
+            <input id="seed" type="text" maxlength="40" autocomplete="off" spellcheck="false">
+            <button type="button" class="btn" id="shuffle">ランダム</button>
+          </div>
+          <p class="note">好きな文字を入れてください。文字が変わると、模様も変わります。</p>
+        </div>
+
+        <div class="field">
+          <label for="palette">色</label>
+          <select id="palette"></select>
+          <div class="chips" id="chips" aria-hidden="true"></div>
+        </div>
+
+        <div class="field">
+          <label for="grid">マスの数 <output id="grid-out"></output></label>
+          <input id="grid" type="range" min="3" max="8" step="1">
+        </div>
+
+        <fieldset class="field">
+          <legend>切り抜きの形</legend>
+          <div class="seg" id="mask">
+            <label><input type="radio" name="mask" value="square"><span>四角</span></label>
+            <label><input type="radio" name="mask" value="rounded"><span>角丸</span></label>
+            <label><input type="radio" name="mask" value="circle"><span>丸</span></label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label class="check"><input id="symmetric" type="checkbox"> 左右対称にする</label>
+        </div>
+      </section>
+    </div>
+
+    <section class="more" aria-labelledby="more-title">
+      <h2 id="more-title">ほかの候補</h2>
+      <p class="note">押すと、その候補になります。</p>
+      <div class="cands" id="cands"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status"></div>
+</body>
+</html>
