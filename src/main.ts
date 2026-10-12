@@ -14,7 +14,8 @@ interface State {
 
 const state: State = {
   seed: 'KIKI',
-  paletteId: PALETTES[0]?.id ?? 'matcha',
+  // 最初の色：ポートフォリオの鉛筆画に合わせて「紙とえんぴつ」にする
+  paletteId: 'paper',
   grid: 5,
   symmetric: true,
   mask: 'rounded',
