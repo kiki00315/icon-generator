@@ -1,7 +1,7 @@
 // 画面の動き（入力を受けて、アイコンを作りなおして表示する）。
 import './style.css';
 import { generateIcon, MAX_GRID, MIN_GRID, type IconOptions, type Mask } from './generate';
-import { findPalette, PALETTES } from './palettes';
+import { findPalette, IMPORTED_ID, importedPalette, PALETTES, parseColorsParam, type Palette } from './palettes';
 
 /** 画面の設定の状態 */
 interface State {
@@ -20,6 +20,14 @@ const state: State = {
   symmetric: true,
   mask: 'rounded',
 };
+
+/** 色見本ジェネレーターから受け取ったパレット（なければ null） */
+let imported: Palette | null = null;
+
+/** 今選ばれているパレット。受け取ったパレットが選ばれているときは、そちらを返す */
+function currentPalette(): Palette {
+  return state.paletteId === IMPORTED_ID && imported ? imported : findPalette(state.paletteId);
+}
 
 /**
  * id で HTML の部品を探す。ジェネリクス（<T extends HTMLElement>）：
@@ -44,7 +52,7 @@ const toastBox = must<HTMLDivElement>('toast');
 function toOptions(seedOverride?: string): IconOptions {
   return {
     seed: seedOverride ?? (state.seed || ' '), // 空だと困るので、空のときは空白 1 文字にする
-    colors: findPalette(state.paletteId).colors,
+    colors: currentPalette().colors,
     grid: state.grid,
     symmetric: state.symmetric,
     mask: state.mask,
@@ -62,7 +70,7 @@ function render(): void {
   for (const px of [64, 32, 16]) must(`size-${px}`).innerHTML = svg;
 
   chips.replaceChildren(
-    ...findPalette(state.paletteId).colors.map((color) => {
+    ...currentPalette().colors.map((color) => {
       const chip = document.createElement('i');
       chip.style.background = color;
       return chip;
@@ -170,6 +178,27 @@ must('shuffle').addEventListener('click', () => {
   render();
 });
 
+/**
+ * アドレスの # 以降に、色が入っていたら受け取る（色見本ジェネレーターの「アイコンに使う」から来たとき）。
+ * 例：https://…/icon-generator/#colors=2D3A2E,4F6D44,88A66B
+ * # 以降はサーバーに送られないので、保存したパレットが外に出ることはない。
+ */
+function readImportedPalette(): Palette | null {
+  const raw = new URLSearchParams(window.location.hash.slice(1)).get('colors');
+  if (raw === null) return null;
+  const colors = parseColorsParam(raw);
+  if (!colors) {
+    toast('色を読みこめませんでした');
+    return null;
+  }
+  toast('色見本ジェネレーターのパレットを読みこみました');
+  return importedPalette(colors);
+}
+imported = readImportedPalette();
+if (imported) state.paletteId = IMPORTED_ID;
+
+// 受け取ったパレットがあれば、選択肢の先頭に出す
+if (imported) paletteSelect.append(new Option(imported.name, imported.id));
 for (const palette of PALETTES) {
   paletteSelect.append(new Option(palette.name, palette.id));
 }
